@@ -31,6 +31,10 @@ const Product = () => {
       fetchProductData();
     }
   }, [productId, products]);
+  // 👇 scroll to top whenever productId changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [productId]);
 
   useEffect(() => {}, [productData]);
   return productData ? (

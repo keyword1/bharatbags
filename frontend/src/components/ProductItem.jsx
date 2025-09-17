@@ -20,7 +20,9 @@ const ProductItem = ({ id, image, name, oldPrice, price, stock }) => {
           alt=""
         />
       </Link>
-      <p className="pt-3 pb-1 text-sm font-medium mb-5">{name}</p>
+      <Link to={`/product/${id}`}>
+        <p className="pt-3 pb-1 text-sm font-medium mb-5">{name}</p>
+      </Link>
       {stock > 0 ? (
         <div className="flex justify-between">
           <div className="flex">
