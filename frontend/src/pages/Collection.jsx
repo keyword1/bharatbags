@@ -34,10 +34,10 @@ const Collection = () => {
     let fpCopy = filterProducts.slice();
     switch (sortType) {
       case "low-high":
-        setFilterProducts(fpCopy.sort((a, b) => a.price - b.price));
+        setFilterProducts(fpCopy.sort((a, b) => a.new_price - b.new_price));
         break;
       case "high-low":
-        setFilterProducts(fpCopy.sort((a, b) => b.price - a.price));
+        setFilterProducts(fpCopy.sort((a, b) => b.new_price - a.new_price));
         break;
       default:
         applyFilter();
@@ -81,7 +81,7 @@ const Collection = () => {
               <input
                 type="checkbox"
                 className="w-4"
-                value={"school"}
+                value={"School"}
                 onChange={toggleCategory}
               />{" "}
               School Bags
@@ -90,7 +90,7 @@ const Collection = () => {
               <input
                 type="checkbox"
                 className="w-4"
-                value={"luggage"}
+                value={"Luggage"}
                 onChange={toggleCategory}
               />{" "}
               Luggage Bags
@@ -99,7 +99,7 @@ const Collection = () => {
               <input
                 type="checkbox"
                 className="w-4"
-                value={"laptop"}
+                value={"Laptop"}
                 onChange={toggleCategory}
               />{" "}
               Laptop Bags
@@ -108,7 +108,7 @@ const Collection = () => {
               <input
                 type="checkbox"
                 className="w-4"
-                value={"duffer"}
+                value={"Duffer"}
                 onChange={toggleCategory}
               />{" "}
               Duffer Bags
@@ -117,7 +117,7 @@ const Collection = () => {
               <input
                 type="checkbox"
                 className="w-4"
-                value={"trekking"}
+                value={"Trekking"}
                 onChange={toggleCategory}
               />{" "}
               Trekking Bags
@@ -126,7 +126,7 @@ const Collection = () => {
               <input
                 type="checkbox"
                 className="w-4"
-                value={"lunch"}
+                value={"Lunch"}
                 onChange={toggleCategory}
               />{" "}
               Lunch Bags
@@ -135,7 +135,7 @@ const Collection = () => {
               <input
                 type="checkbox"
                 className="w-4"
-                value={"pouch"}
+                value={"Pouch"}
                 onChange={toggleCategory}
               />{" "}
               Pouches
@@ -144,7 +144,7 @@ const Collection = () => {
               <input
                 type="checkbox"
                 className="w-4"
-                value={"caps"}
+                value={"Caps"}
                 onChange={toggleCategory}
               />{" "}
               Caps
