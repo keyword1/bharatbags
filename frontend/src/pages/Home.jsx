@@ -6,13 +6,19 @@ import BestSeller from "../components/BestSeller";
 import OurPolicy from "../components/OurPolicy";
 import ReviewModal from "../components/ReviewModal";
 import ReviewBanner from "../components/ReviewBanner";
+import JustCollections from "../components/JustCollections";
+// import cron from "node-cron";
 const Home = () => {
+  // cron.schedule("*/10 * * * * *", async () => {
+  //   console.log("Checking for expired reservations...");
+  // });
   return (
     <div>
       <Hero />
+      <LatestCollections />
       <SaleBanner />
       <ReviewBanner />
-      <LatestCollections />
+      <JustCollections />
       {/* <BestSeller/> */}
       <OurPolicy />
     </div>

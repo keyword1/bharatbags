@@ -5,6 +5,7 @@ import EditAddress from "./EditAddress.jsx";
 import EditNumber from "../components/EditNumber.jsx";
 import Draggable from "react-draggable";
 import { useRef } from "react";
+import icons from "../assets/icons/icons.jsx";
 
 const Profile = () => {
   const { userDetails } = useContext(UserContext);
@@ -16,10 +17,11 @@ const Profile = () => {
   const [addressTF, setAddressTF] = useState(
     userDetails.address ? true : false
   );
+  const user_picture = userDetails.user_picture;
   useEffect(() => {
     console.log("user Details - profile ", addressTF);
   }, [userDetails]);
-
+  console.log("user pic: ", userDetails.user_picture);
   return (
     <div className="flex justify-center mt-5 relative">
       {showEdit && (
@@ -59,7 +61,17 @@ const Profile = () => {
       <div className="flex gap-3 w-[80%] justify-center">
         <div className="flex w-[100%] flex-col gap-3 justify-center items-center">
           <div className="flex mt-5 w-24 h-24 bg-blue-300 justify-center items-center rounded-full">
-            avatar
+            {userDetails.user_picture ? (
+              <img
+                src={userDetails.user_picture}
+                alt="avatar"
+                className="rounded-full w-24"
+              />
+            ) : (
+              icons.profile("profile")
+            )}
+            {/* <img src={user_picture} alt="avatar" className="rounded-full" /> */}
+            {/* avatar */}
           </div>
           <div>{userDetails.name}</div>
         </div>

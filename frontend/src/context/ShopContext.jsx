@@ -21,7 +21,7 @@ const ShopContextProvider = (props) => {
     fetchData();
   }, []);
   const currency = "₹";
-  const delivery_fee = "10";
+  const delivery_fee = 10;
   const [cartItems, setCartItems] = useState({});
   const navigate = useNavigate();
   const token = localStorage.getItem("token");

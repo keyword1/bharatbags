@@ -4,18 +4,30 @@ import connectDB from "../config/mysqlDB.js";
 
 const orderRouter = express.Router();
 
+orderRouter.post("/check-stock", verifyToken, async (req, res) => {
+  const { cartData, user_id } = req.body;
+  const less_stock_details = 0;
+  try {
+    console.log("user id: ", user_id);
+    console.log("cart data: ", cartData);
+    cartData.map((item) => {
+      console.log("item stock check: ", item.id);
+    });
+    res.json({ success: true, message: "checked stock" });
+  } catch (error) {}
+});
 orderRouter.post("/place", verifyToken, async (req, res) => {
-  const { cartItems, totalAmount, paymentId, address, orderedItems } = req.body;
+  const { cartItems, totalAmount, txnId, address, orderedItems } = req.body;
   const userId = req.user.id; // ✅ extracted securely from token
 
   // console.log("test: ", orderedItems[0].id, orderedItems[0].qty);
   // TODO:Save to DB using userId
   const sql = await connectDB.query(
-    `insert into orders (user_id,total_payment,total_payment_id,address,item_qty,status_m) values (?,?,?,?,?,?)`,
+    `insert into orders (user_id,total_payment,transaction_id,address,item_qty,status_m) values (?,?,?,?,?,?)`,
     [
       userId,
       totalAmount,
-      paymentId,
+      txnId,
       address,
       JSON.stringify(orderedItems),
       "Ready to Ship",
@@ -197,8 +209,8 @@ orderRouter.post("/move-to-history", async (req, res) => {
 
     // 1. Copy order row into history table with new status_m
     await connection.query(
-      `INSERT INTO orders_history (order_id, user_id, total_payment, total_payment_id, address, item_qty, status_m, created_at)
-       SELECT order_id, user_id, total_payment, total_payment_id, address, item_qty, ? AS status_m, created_at
+      `INSERT INTO orders_history (order_id, user_id, total_payment, transaction_id, address, item_qty, status_m, created_at)
+       SELECT order_id, user_id, total_payment, transaction_id, address, item_qty, ? AS status_m, created_at
        FROM orders
        WHERE order_id = ?`,
       [status_m, order_id]

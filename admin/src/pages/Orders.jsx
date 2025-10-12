@@ -65,7 +65,7 @@ const Orders = () => {
         <b>Address</b>
         <b>Status</b>
         <b>Total</b>
-        <b>Pay Id</b>
+        <b>Txn Id</b>
       </div>
       <hr />
       {Array.isArray(orders) &&
@@ -135,7 +135,7 @@ const Orders = () => {
                   <option value="Delivered">Delivered</option>
                 </select>
                 <p>{item.total_payment}</p>
-                <p>{item.total_payment_id}</p>
+                <p>{item.transaction_id}</p>
               </div>
               {/* <SingleOrderList orders={orders} />  */}
               {visibleId == item.order_id && (

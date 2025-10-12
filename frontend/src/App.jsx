@@ -73,7 +73,10 @@ const App = () => {
             isAuthenticated ? (
               <Navigate to="/collection" />
             ) : (
-              <Otp setIsAuthenticated={setIsAuthenticated} />
+              <Otp
+                setToken={setToken}
+                setIsAuthenticated={setIsAuthenticated}
+              />
             )
           }
         />

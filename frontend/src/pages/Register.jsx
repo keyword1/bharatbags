@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { backendUrl } from "../App";
 import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Register = ({ setToken }) => {
   const [form, setForm] = useState({
@@ -146,6 +147,13 @@ const Register = ({ setToken }) => {
         >
           Sign Up
         </button>
+        <div className="mt-2 flex justify-center">
+          <p>(OR)</p>
+        </div>
+
+        <div className="mt-2 flex justify-center">
+          <GoogleLogin />
+        </div>
       </form>
     </div>
   );

@@ -9,7 +9,12 @@ import productModel from "./models/productModel.js";
 import userRouter from "./routes/userRoutes.js";
 import productRouter from "./routes/productRoute.js";
 import orderRouter from "./routes/orderRoute.js";
+import cron from "node-cron";
 
+///TTL
+// cron.schedule("*/3 * * * * *", () => {
+//   console.log("This runs every minute on the server.");
+// });
 // Setup for ES module __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +29,10 @@ app.use(cors());
 app.use(
   "/images",
   express.static(path.join(__dirname, "uploads/product_images"))
+);
+app.use(
+  "/admin_images",
+  express.static(path.join(__dirname, "uploads/admin_images"))
 );
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);

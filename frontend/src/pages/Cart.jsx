@@ -19,7 +19,7 @@ const Cart = () => {
   const { userDetails } = useContext(UserContext);
 
   const [cartData, setCartData] = useState([]);
-
+  const token = localStorage.getItem("token");
   useEffect(() => {
     const fetchUserReview = async () => {
       try {
@@ -58,6 +58,23 @@ const Cart = () => {
 
     fetchUserReview();
   }, [cartItems, userDetails]);
+
+  //checking the INVENTORY
+  const handlePlaceOrder = async () => {
+    console.log("cart data me: ", userDetails.id);
+    const result = await axios.post(
+      `${backendUrl}/api/order/check-stock`,
+      { cartData, user_id: userDetails.id },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log("result; ", result.data.success);
+    if (result.data.success) {
+      setOrderedItems(cartData);
+      return navigate("/place-order");
+    } else {
+    }
+  };
+
   return (
     <div className="border-t pt-14">
       <Title first="Your" second="Cart" />
@@ -119,13 +136,10 @@ const Cart = () => {
           <div className="w-full text-end">
             {cartData.length > 0 && (
               <button
-                onClick={() => {
-                  setOrderedItems(cartData);
-                  return navigate("/place-order");
-                }}
+                onClick={handlePlaceOrder}
                 className="py-4 px-8 my-8 bg-black text-white"
               >
-                PROCEED TO CHECKOUT
+                PLACE ORDER{/* PROCEED TO CHECKOUT */}
               </button>
             )}
           </div>

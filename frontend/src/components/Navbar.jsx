@@ -3,12 +3,13 @@ import { logos } from "../assets/logos/Logo";
 import { NavLink, Link } from "react-router-dom";
 import icons from "../assets/icons/icons";
 import { ShopContext } from "../context/ShopContext";
+import { UserContext } from "../context/UserContext";
 
 const Navbar = ({ setToken, isAuthenticated, setIsAuthenticated }) => {
   const [isOpen, setOpen] = useState(false);
   const [visible, setVisible] = useState(false);
   const { getCartCount, emptyCart } = useContext(ShopContext);
-
+  const { userDetails } = useContext(UserContext);
   useEffect(() => {
     // Whenever login state changes, close dropdown
     setOpen(false);
@@ -66,9 +67,17 @@ const Navbar = ({ setToken, isAuthenticated, setIsAuthenticated }) => {
             <div
               onClick={handleOpen}
               id="user-icon"
-              className="w-5 cursor-pointer"
+              className="w-8 cursor-pointer"
             >
-              {icons.profile("profile")}
+              {userDetails.user_picture ? (
+                <img
+                  src={userDetails.user_picture}
+                  alt="avatar"
+                  className="rounded-full w-24"
+                />
+              ) : (
+                icons.profile("profile")
+              )}
             </div>
             {isOpen && (
               /*group-hover:block hidden */
@@ -108,6 +117,7 @@ const Navbar = ({ setToken, isAuthenticated, setIsAuthenticated }) => {
                     to="/login"
                     onClick={() => {
                       setToken("");
+                      localStorage.setItem("userDetails", "");
                       setIsAuthenticated(false);
                       emptyCart();
                     }}

@@ -2,19 +2,19 @@ import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import ProductItem from "./ProductItem";
 
-const LatestCollections = () => {
+const JustCollections = () => {
   const { products } = useContext(ShopContext);
   const [latestProducts, setLatestProducts] = useState([]);
 
   useEffect(() => {
     if (products && products.length) {
-      setLatestProducts(products.slice(-10).reverse());
+      setLatestProducts(products.slice(0, 10));
     }
   }, [products]);
   return (
     <div className="my-10">
       <h1 className="text-3xl sm:py-3 lg:text-5xl leading-relaxed">
-        <span className="font-light">Latest</span> Collection
+        <span className="font-light">-</span> Collection
       </h1>
       {/* rendering products */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6">
@@ -36,4 +36,4 @@ const LatestCollections = () => {
   );
 };
 
-export default LatestCollections;
+export default JustCollections;

@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import axios from "axios";
 import { backendUrl } from "../App";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { UserContext } from "../context/UserContext";
 
-const Otp = ({ setIsAuthenticated }) => {
+const Otp = ({ setToken, setIsAuthenticated }) => {
+  const { userDetails, setUserDetails } = useContext(UserContext);
   const [otp, setOtp] = useState("");
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -19,8 +21,11 @@ const Otp = ({ setIsAuthenticated }) => {
       });
 
       if (res.data.success) {
+        setToken(res.data.token);
         setIsAuthenticated(true);
+        setUserDetails(res.data.user);
         toast.success(res.data.message);
+        localStorage.setItem("userDetails", JSON.stringify(userDetails));
         navigate("/collection");
       } else {
         toast.error(res.data.message);

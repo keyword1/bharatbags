@@ -5,11 +5,26 @@ import jwt from "jsonwebtoken";
 import { email_template } from "../../frontend/src/components/email_template.js";
 import { verified_mail_template } from "../../frontend/src/components/verified_mail_template.js";
 import nodemailer from "nodemailer";
+import { OAuth2Client } from "google-auth-library";
+import "dotenv/config";
 
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const db = connectDB;
 const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRETE_KEY, { expiresIn: "7d" });
 };
+async function verifyGoogleToken(idToken) {
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    return payload;
+  } catch (error) {
+    return false;
+  }
+}
 const transporter = nodemailer.createTransport({
   // secure: true,
   // host: "smtp.gmail.com",
@@ -97,12 +112,14 @@ const loginUser = async (req, res) => {
       const user2 = user[0][0];
       res.json({
         success: true,
+        status: "match",
         token,
         user: {
           id: user2.user_id,
           name: user2.first_name,
           email: user2.email,
           phone: user2.phone_number,
+          user_picture: user2.user_picture,
           address: user2.street
             ? {
                 street: user2.street,
@@ -117,11 +134,134 @@ const loginUser = async (req, res) => {
       console.log("user controller: ", user2);
     } else {
       // transporter.sendMail();
-      res.json({ success: false, message: "Invalid credentials" });
+      res.json({
+        success: false,
+        message: "Invalid credentials",
+        status: "match",
+      });
     }
   } catch (error) {
     console.error(error);
     res.json({ success: false, message: error.message });
+  }
+};
+// user google login
+const googleLogin = async (req, res) => {
+  try {
+    //googleId=sub(from credential)
+    const { idToken } = req.body;
+    // console.log("testing..");
+
+    const gUser = await verifyGoogleToken(idToken);
+    //verifying with google if user is authentic or not
+
+    if (gUser) {
+      // console.log("guser verified!", gUser.sub);
+      const googleId = gUser.sub;
+      const email = gUser.email;
+      const exists = await connectDB.query(
+        `SELECT u.*, a.street, a.city, a.district, a.state, a.zip, a.address_id
+   FROM users u
+   LEFT JOIN addresses a ON u.user_id = a.user_id
+   WHERE google_id = ?`,
+        [googleId]
+      );
+
+      if (exists[0][0]) {
+        const user2 = exists[0][0];
+        console.log("google user exists!");
+        const token = createToken(user2.user_id);
+        res.json({
+          success: true,
+          token,
+          user: {
+            id: user2.user_id,
+            name: user2.first_name,
+            email: user2.email,
+            phone: user2.phone_number,
+            user_picture: user2.user_picture,
+            address: user2.street
+              ? {
+                  street: user2.street,
+                  city: user2.city,
+                  district: user2.district,
+                  state: user2.state,
+                  zip: user2.zip,
+                }
+              : null,
+          },
+        });
+      } else {
+        console.log("google user does nOT exists!");
+        //if google user doesnot exists, then check for user exists directly
+        const local_user = await connectDB.query(
+          `SELECT * FROM users WHERE email = ?`,
+          [email]
+        );
+
+        if (local_user[0][0]) {
+          //update user googleId in DB for user exists directly
+          const [updatedResult] = await connectDB.query(
+            `update users set google_id=? where email=?`,
+            [gUser.sub, gUser.email]
+          );
+          if (updatedResult) {
+            const user = await connectDB.query(
+              `select * from users where email=?`,
+              [gUser.email]
+            );
+            const user2 = user[0][0];
+            const token = createToken(user2.user_id);
+            res.json({
+              success: true,
+              token,
+              user: {
+                id: user2.user_id,
+                name: user2.first_name,
+                email: user2.email,
+                phone: user2.phone_number,
+                user_picture: user2.user_picture,
+                address: null,
+              },
+            });
+          }
+        } else {
+          const { name, family_name, email, sub, picture } = gUser;
+          //insert new user from google
+          const [sql] = await connectDB.query(
+            `INSERT INTO users (first_name, last_name, email,  phone_number,google_id,user_picture,provider,isVerified) 
+       VALUES (?, ?, ?, ?,?,?,?,?)`,
+            [name, family_name, email, "0", sub, picture, "google", "1"]
+          );
+          if (sql.insertId) {
+            const user = await connectDB.query(
+              `select * from users where user_id=?`,
+              [sql.insertId]
+            );
+            const user2 = user[0][0];
+            console.log("local user; ", name, family_name, user2);
+            const token = createToken(sql.insertId);
+            res.json({
+              success: true,
+              token,
+              user: {
+                id: user2.user_id,
+                name: user2.first_name,
+                email: user2.email,
+                phone: user2.phone_number,
+                user_picture: user2.user_picture,
+                address: null,
+              },
+            });
+          }
+        }
+      }
+    } else {
+      //if google token is not verified
+      console.log("Inavalid Gmail credentials");
+    }
+  } catch (error) {
+    console.log(error.message);
   }
 };
 
@@ -138,7 +278,20 @@ const registerUser = async (req, res) => {
     // console.log("user contoller - exists: ", exists[0][0]);
     if (exists[0][0]) {
       // console.log("user controller: user exits");
-      return res.json({ success: false, message: "User already exists" });
+      if (exists[0][0].provider === "google") {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        const [updatedResult] = await connectDB.query(
+          `update users set user_password=?, phone_number=?`,
+          [hashedPassword, phoneNumber]
+        );
+        if (updatedResult) {
+          const token = createToken(exists[0][0].user_id);
+          res.json({ success: true, token });
+        }
+      } else {
+        return res.json({ success: false, message: "User already exists" });
+      }
     }
     //validating email format and password
     if (!validator.isEmail(email)) {
@@ -184,14 +337,43 @@ const registerUser = async (req, res) => {
 const loginAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (
-      email === process.env.ADMIN_EMAIL &&
-      password === process.env.ADMIN_PASSWORD
-    ) {
-      const token = jwt.sign(email + password, process.env.JWT_SECRETE_KEY);
-      res.json({ success: true, token });
+    const user = await connectDB.query(`SELECT * FROM admin WHERE email = ?`, [
+      email,
+    ]);
+
+    if (!user[0][0]) {
+      return res.json({
+        success: false,
+        message: "User does not exists",
+        status: "register",
+      });
     } else {
-      res.json({ success: false, message: "Invalid credentials" });
+      console.log("user pass: ", password);
+      const isMatch = await bcrypt.compare(password, user[0][0].admin_password);
+      console.log("is match", isMatch);
+      if (isMatch) {
+        const token = jwt.sign(
+          { role: "admin", email },
+          process.env.JWT_SECRETE_KEY,
+          {
+            expiresIn: "1h",
+          }
+        );
+        const user2 = user[0][0];
+        res.json({
+          success: true,
+          token,
+          user: {
+            name: user2.f_name,
+            email: user2.email,
+            // if no address exists
+          },
+        });
+        console.log("user controller: ", user2);
+      } else {
+        // transporter.sendMail();
+        res.json({ success: false, message: "Invalid credentials" });
+      }
     }
   } catch (error) {
     console.error(error);
@@ -212,6 +394,8 @@ const updateVerified = async (req, res) => {
     const user = await connectDB.query("select * from users where email = ?", [
       email,
     ]);
+    const user2 = user[0][0];
+    const token = createToken(user2.user_id);
     if (user[0][0].otp == otp) {
       await db.query("UPDATE users SET isVerified = ?, otp=? WHERE email = ?", [
         1,
@@ -219,7 +403,27 @@ const updateVerified = async (req, res) => {
         email,
       ]);
       transporter.sendMail(verifiedMailOption());
-      return res.json({ success: true, message: "Email verified!" });
+      return res.json({
+        success: true,
+        token,
+        user: {
+          id: user2.user_id,
+          name: user2.first_name,
+          email: user2.email,
+          phone: user2.phone_number,
+          user_picture: user2.user_picture,
+          address: user2.street
+            ? {
+                street: user2.street,
+                city: user2.city,
+                district: user2.district,
+                state: user2.state,
+                zip: user2.zip,
+              }
+            : null, // if no address exists
+        },
+        message: "Email verified!",
+      });
     } else {
       return res.json({ success: false, message: "Invalid OTP" });
     }
@@ -281,4 +485,5 @@ export {
   createAddress,
   updateAddress,
   updatePhoneNumber,
+  googleLogin,
 };

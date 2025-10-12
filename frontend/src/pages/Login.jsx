@@ -4,6 +4,8 @@ import { backendUrl } from "../App";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { UserContext } from "../context/UserContext";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 
 const Login = ({ setToken, setIsAuthenticated }) => {
   const { userDetails, setUserDetails } = useContext(UserContext);
@@ -20,19 +22,19 @@ const Login = ({ setToken, setIsAuthenticated }) => {
         password,
       });
 
-      if (!res.data.success) {
+      if (!res.data.success && res.data.status === "match") {
         setErrorText("Invalid Credentials");
         return toast.error(res.data.message);
       }
-      if (res.data.status === "otp")
+      if (!res.data.success && res.data.status === "otp")
         return navigate("/otp", { state: { email } });
 
       setToken(res.data.token);
       setIsAuthenticated(true);
       navigate("/collection");
       setUserDetails(res.data.user);
-      localStorage.setItem("userDetails", JSON.stringify(res.data.user));
-      console.log("user Details: ", res.data.user);
+      localStorage.setItem("userDetails", JSON.stringify(userDetails));
+      // console.log("user Details: ", res.data.user);
     } catch (err) {
       console.log(err.message);
     }
@@ -74,6 +76,39 @@ const Login = ({ setToken, setIsAuthenticated }) => {
         >
           Create an account
         </p>
+        <div className="mt-2 flex justify-center">
+          <p>(OR)</p>
+        </div>
+        <div className="mt-2 flex justify-center w-[100%]">
+          <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+              try {
+                // console.log(credentialResponse.credential);
+                const idToken = credentialResponse.credential;
+                // navigate("/collection");
+                const res = await axios.post(
+                  backendUrl + "/api/user/googlelogin",
+                  { idToken }
+                );
+                console.log("Guser details", res);
+                setToken(res.data.token);
+                setIsAuthenticated(true);
+                navigate("/collection");
+                setUserDetails(res.data.user);
+                localStorage.setItem(
+                  "userDetails",
+                  JSON.stringify(res.data.user)
+                );
+                console.log("user Details: ", res.data.user);
+              } catch (error) {
+                console.log(error.message);
+              }
+            }}
+            onError={() => {
+              console.log("Login failed!");
+            }}
+          />
+        </div>
       </form>
     </div>
   );

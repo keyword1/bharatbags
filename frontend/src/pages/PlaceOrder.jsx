@@ -9,7 +9,6 @@ import { backendUrl } from "../../../admin/src/App";
 import { UserContext } from "../context/UserContext";
 
 const PlaceOrder = ({ setToken, setIsAuthenticated }) => {
-  const [method, setMethod] = useState("");
   const { userDetails } = useContext(UserContext);
   const [selectedAddress, setSelectedAddress] = useState("address1");
   // form state for address1
@@ -27,13 +26,19 @@ const PlaceOrder = ({ setToken, setIsAuthenticated }) => {
   };
 
   console.log("user details: ", userDetails.address);
-  const { cartItems, orderedItems, setCartItems, emptyCart, getCartAmount } =
-    useContext(ShopContext);
+  const {
+    cartItems,
+    orderedItems,
+    setCartItems,
+    emptyCart,
+    getCartAmount,
+    delivery_fee,
+  } = useContext(ShopContext);
   const navigate = useNavigate();
   const formRef = useRef(null);
 
   // TODO: get product price
-  const submitOrder = async (cartItems, totalAmount, paymentId, address) => {
+  const submitOrder = async (cartItems, totalAmount, txnId, address) => {
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("error: User not authorised");
@@ -43,12 +48,13 @@ const PlaceOrder = ({ setToken, setIsAuthenticated }) => {
       return false;
     }
     try {
+      totalAmount = totalAmount + delivery_fee;
       const response = await axios.post(
         backendUrl + "/api/order/place",
         {
           cartItems,
           totalAmount,
-          paymentId,
+          txnId,
           address,
           orderedItems,
         },
@@ -84,27 +90,30 @@ const PlaceOrder = ({ setToken, setIsAuthenticated }) => {
   //   console.log("item: ", item);
   //   console.log(cartItems[item]["qty"]);
   // }
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // stop default refresh
+
+    const finalAddress =
+      selectedAddress === "address1" ? address1 : userDetails.address;
+
+    const success = await submitOrder(
+      cartItems,
+      getCartAmount(),
+      "payID:kkk253",
+      JSON.stringify(finalAddress)
+    );
+
+    if (success) {
+      navigate("/orders");
+    } else {
+      navigate("/login");
+    }
+  };
+  const handleBack = () => {
+    navigate("/cart");
+  };
   return (
-    <form
-      onSubmit={async (e) => {
-        e.preventDefault(); // stop default refresh
-        const finalAddress =
-          selectedAddress === "address1" ? address1 : userDetails.address;
-
-        const success = await submitOrder(
-          cartItems,
-          getCartAmount(),
-          "payID:kkk253",
-          JSON.stringify(finalAddress)
-        );
-
-        if (success) {
-          navigate("/orders");
-        } else {
-          navigate("/login");
-        }
-      }}
-    >
+    <form onSubmit={handleSubmit}>
       <div className="flex flex-col sm:flex-row justify-between gap-4 pt-5 min-h-[70vh] mt-16">
         <div className="flex flex-col gap-4 w-full sm:max-w-[480px]">
           {/* Left side */}
@@ -189,7 +198,7 @@ const PlaceOrder = ({ setToken, setIsAuthenticated }) => {
           />
         </div>
         {/* Middle */}
-        {userDetails.address ? (
+        {userDetails.address && userDetails.phone.length == 10 ? (
           <div className="flex flex-col">
             <input
               type="radio"
@@ -205,7 +214,12 @@ const PlaceOrder = ({ setToken, setIsAuthenticated }) => {
             <p>Pincode: {userDetails.address.zip}</p>
           </div>
         ) : (
-          <p>No address saved</p>
+          <div>
+            <p>No address saved</p>
+            <p className="text-xs">
+              Update your address & phone number in profile page
+            </p>
+          </div>
         )}
         {/* Right Side */}
         <div>
@@ -213,12 +227,19 @@ const PlaceOrder = ({ setToken, setIsAuthenticated }) => {
             <CartTotal />
           </div>
           <div className="mt-12">
-            <div className="w-full mt-8 text-end">
+            <div className=" flex justify-end w-full mt-8 text-end gap-3">
+              <button
+                type="button"
+                onClick={() => handleBack()}
+                className="bg-black text-white px-8 py-3 text-sm"
+              >
+                BACK
+              </button>
               <button
                 type="submit"
                 className="bg-black text-white px-8 py-3 text-sm"
               >
-                PLACE ORDER
+                PAY NOW{/* PLACE ORDER */}
               </button>
             </div>
           </div>

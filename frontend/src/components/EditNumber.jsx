@@ -30,7 +30,7 @@ const EditNumber = ({ userDetails, onClose }) => {
   };
   const handleChange = (e) => {
     if (e.target.value.length < 11) {
-      console.log("length: ", e.target.value.length);
+      // console.log("length: ", e.target.value.length);
       setFormData({ phone_number: e.target.value });
     }
   };
@@ -47,9 +47,9 @@ const EditNumber = ({ userDetails, onClose }) => {
             className="border border-gray-300 rounded w-full px-1.5 py-1.5 text-sm 
           [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none 
           [&::-webkit-inner-spin-button]:appearance-none"
-            type="number"
+            type="tel"
             inputMode="numeric"
-            pattern="[0-9]*"
+            pattern="[0-9]{10}"
             placeholder="Your Phone Number here"
             name="phone"
             onChange={handleChange}

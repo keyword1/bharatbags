@@ -40,7 +40,7 @@ const History = () => {
       <div className="flex justify-between my-10">
         <p className="text-xl font-medium mb-5">All Orders</p>
       </div>
-      <div className="text-sm hidden md:grid grid-cols-[1fr_1fr_1fr_1fr_2fr_1fr_1fr_1fr] items-center mb-4 gap-1">
+      <div className="text-sm hidden md:grid grid-cols-[1fr_1fr_1fr_1fr_2fr_1fr_1fr_1fr_1fr] items-center mb-4 gap-1">
         <b>Order Id</b>
         <b>Customer</b>
         <b>Email</b>
@@ -49,6 +49,7 @@ const History = () => {
         <b>Status</b>
         <b>Total</b>
         <b>Date</b>
+        <b>Txn Id</b>
       </div>
       <hr />
       {orders.map((item) => {
@@ -61,7 +62,7 @@ const History = () => {
         const items = JSON.parse(item.item_qty);
         return (
           <div className="flex flex-col gap-2 ">
-            <div className="text-sm hidden md:grid grid-cols-[1fr_1fr_1fr_1fr_2fr_1fr_1fr_1fr] items-center mt-2 justify-center gap-1 bg-slate-100">
+            <div className="text-sm hidden md:grid grid-cols-[1fr_1fr_1fr_1fr_2fr_1fr_1fr_1fr_1fr] items-center mt-2 justify-center gap-1 bg-slate-100">
               <div>
                 <p
                   onClick={() => {
@@ -100,6 +101,7 @@ const History = () => {
               <div>{item.status_m}</div>
               <p>{item.total_payment}</p>
               <p>{orderDate(item.created_at)}</p>
+              <p>{item.transaction_id}</p>
             </div>
             {/* <SingleOrderList orders={orders} />  */}
             {visibleId == item.order_id && (

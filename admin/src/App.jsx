@@ -8,6 +8,7 @@ import Orders from "./pages/Orders";
 import Login from "./components/Login";
 import Edit from "./pages/Edit";
 import History from "./pages/History";
+import Features from "./pages/Features";
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
 const App = () => {
@@ -37,6 +38,7 @@ const App = () => {
                   element={<Edit token={token} />}
                 />
                 <Route path="/history" element={<History token={token} />} />
+                <Route path="/features" element={<Features token={token} />} />
               </Routes>
             </div>
           </div>
