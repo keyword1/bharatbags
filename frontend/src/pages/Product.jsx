@@ -5,6 +5,8 @@ import icons from "../assets/icons/icons";
 import RelatedProducts from "../components/RelatedProducts";
 import { backendUrl } from "../App";
 import RatingSlider from "../components/RatingSlider";
+import StarRating from "../components/StarRating";
+import axios from "axios";
 
 const Product = () => {
   const { productId } = useParams();
@@ -12,6 +14,7 @@ const Product = () => {
   const [productData, setProductData] = useState(false);
   const [image, setImage] = useState("");
   const [images, setImages] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const fetchProductData = async () => {
     products.map((item) => {
       if (item.product_id === Number(productId)) {
@@ -22,6 +25,15 @@ const Product = () => {
         return null;
       }
     });
+    const reviews_data = await axios.post(
+      backendUrl + "/api/product/list-reviews",
+      { product_id: productId }
+    );
+
+    if (reviews_data.data.result.length > 0) {
+      setReviews(reviews_data.data.result);
+      console.log("reviews data: ", reviews_data.data.result);
+    }
   };
   const handleRatingChange = (val) => {
     console.log("User rating:", val);
@@ -91,13 +103,14 @@ const Product = () => {
           </h1>
           {/* rating stars */}
           <div className="flex items-center">
-            <>{icons.star_icon("fill-[var(--yellow)]")}</>
+            {/* <>{icons.star_icon("fill-[var(--yellow)]")}</>
             <>{icons.star_icon("fill-[var(--yellow)]")}</>
             <>{icons.star_icon("fill-[var(--yellow)]")}</>
             <>{icons.star_icon("fill-[var(--yellow)]")}</>
             <>{icons.star_half_icon("fill-[var(--yellow)]")}</>
-            <>{icons.star_empty_icon("fill-[var(--yellow)] hidden")}</>
-            <p>(122)</p>
+            <>{icons.star_empty_icon("fill-[var(--yellow)] hidden")}</> */}
+            <StarRating rating={productData.rating} />
+            <p className="pl-2">({productData.rating_count})</p>
           </div>
           <div className="flex gap-3">
             <h1 className="text-2xl sm:text-4xl sm:font-medium ">
@@ -140,16 +153,37 @@ const Product = () => {
         current_id={productData.product_id}
       />
       <div className="mt-20">
-        <div>
+        {/* <div>
           <RatingSlider onChange={handleRatingChange} />
-        </div>
+        </div> */}
 
         {/* Review section */}
         <div className="flex">
-          <p className="px-5 py-3 border text-sm">Reviews(122)</p>
+          <p className="px-5 py-3 border text-sm">
+            Reviews ({productData.rating_count})
+          </p>
         </div>
         <hr />
-        <div className="flex flex-col mt-10">
+
+        {reviews.map((item, index) => {
+          return (
+            <div className="flex flex-col mt-10" key={index}>
+              <div className="flex items-center gap-4 mb-5">
+                <div className="rounded-full px-5 py-5 bg-gray-500"></div>
+                <div>
+                  <p className="text-base font-medium">{item.user_name}</p>
+                  {/* user name */}
+                  <div className="flex gap-1">
+                    <StarRating rating={item.rating} />{" "}
+                    {/* <p className="p-1 bg-black text-white">{item.rating}</p> */}
+                  </div>
+                </div>
+              </div>
+              <p className="text-sm">{item.review}</p>
+            </div>
+          );
+        })}
+        {/* <div className="flex flex-col mt-10">
           <div className="flex items-center gap-4 mb-5">
             <div className="rounded-full px-5 py-5 bg-gray-500"></div>
             <div>
@@ -169,7 +203,7 @@ const Product = () => {
             corporis quaerat temporibus! Ducimus, repellat repellendus facere
             eligendi molestiae non. Quae, distinctio.
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   ) : (

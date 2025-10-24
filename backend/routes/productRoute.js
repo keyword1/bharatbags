@@ -5,8 +5,13 @@ import {
   listProducts,
   singleProduct,
   updateProduct,
+  updateSalesBanner,
+  listAdminDashboard,
+  updateAdminDashboard,
+  listReviews,
 } from "../controllers/productController.js";
 import upload from "../middleware/multer.js";
+import { upload2 } from "../middleware/multer.js";
 import adminAuth from "../middleware/adminAuth.js";
 
 const productRouter = express.Router();
@@ -36,5 +41,15 @@ productRouter.post(
   ]),
   updateProduct
 );
+//admin features
+productRouter.post(
+  "/update-sales-banner",
+  adminAuth,
+  upload2.fields([{ name: "image1", maxCount: 1 }]),
+  updateSalesBanner
+);
+productRouter.get("/list-admin-dashboard", listAdminDashboard);
+productRouter.post("/update-admin-dashboard", adminAuth, updateAdminDashboard);
+productRouter.post("/list-reviews", listReviews);
 
 export default productRouter;

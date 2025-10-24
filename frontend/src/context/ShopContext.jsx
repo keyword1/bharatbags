@@ -9,19 +9,35 @@ export const ShopContext = createContext();
 
 const ShopContextProvider = (props) => {
   const [products, setProducts] = useState([]);
+  const [salesBanner, setSalesBanner] = useState();
   const [orderedItems, setOrderedItems] = useState([]);
+  const [displayBanner, setDisplayBanner] = useState(false);
+  const [displayReview, setDisplayReview] = useState(false);
+  const [deliveryFee, setDeliveryFee] = useState(0);
   useEffect(() => {
+    //list products =============
     const fetchData = async () => {
       const result = await axios.get(backendUrl + "/api/product/list");
       // console.log(result.data.result[0]);
       const items = result.data.result[0];
       setProducts(items);
       // console.log(items);
+
+      //list admin dashboard
+      const result2 = await axios.get(
+        backendUrl + "/api/product/list-admin-dashboard"
+      );
+      const admin_items = result2.data.result[0];
+      console.log("admin items: ", admin_items[0].sales_banner1);
+      setSalesBanner(admin_items[0].sales_banner1);
+      setDisplayBanner(admin_items[0].dis_banner_tf);
+      setDisplayReview(admin_items[0].dis_review_banner_tf);
+      setDeliveryFee(Number(admin_items[0].delivery_fee));
     };
     fetchData();
   }, []);
   const currency = "₹";
-  const delivery_fee = 10;
+  const delivery_fee = deliveryFee;
   const [cartItems, setCartItems] = useState({});
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -98,6 +114,9 @@ const ShopContextProvider = (props) => {
     orderedItems,
     setOrderedItems,
     setCartItems,
+    salesBanner,
+    displayBanner,
+    displayReview,
   };
 
   return (

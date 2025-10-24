@@ -2,6 +2,68 @@ import connectDB from "../config/mysqlDB.js";
 import fs from "fs";
 import path from "path";
 
+//update banner
+const updateSalesBanner = async (req, res) => {
+  try {
+    //======================================================delete banner first
+    const [getBanner] = await connectDB.query(
+      `select sales_banner1 from admin_dashboard where adminDashNo=?`,
+      [1]
+    );
+    // console.log("get banner: ", getBanner[0].sales_banner1);
+    const filename = getBanner[0].sales_banner1;
+    const filePath = path.join("uploads", "admin_images", filename);
+    // adjust if your path is different
+    if (fs.existsSync(filePath)) {
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error(`Error deleting ${filename}:`, err.message);
+        } else {
+          console.log(`Deleted: ${filename}`);
+        }
+      });
+    }
+    //=============================================================update banner in DB
+    const image1 = req.files.image1 && req.files.image1[0];
+    // console.log(title, details, price, category);
+    const banner = image1.filename;
+    // console.log(arr);
+    const sql = await connectDB.query(
+      `update admin_dashboard set sales_banner1=? where adminDashNo=?`,
+      [banner, 1]
+    );
+    console.log(sql.insertId); //insertId = product_id (which u get in the 'sql' obj)
+    res.json({ success: true, message: "updated sales banner" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+//update admin dashboard
+const updateAdminDashboard = async (req, res) => {
+  try {
+    const { disBanner, disReview, deliveryFee } = req.body;
+
+    // Validate inputs
+    if (typeof disBanner === "undefined" || typeof disReview === "undefined") {
+      return res.status(400).json({
+        success: false,
+        message: "Missing disBanner or disReview values",
+      });
+    }
+
+    // Convert booleans to numeric values for MySQL (1 or 0)
+    const disBannerValue = disBanner ? 1 : 0;
+    const disReviewValue = disReview ? 1 : 0;
+
+    await connectDB.query(
+      `update admin_dashboard set dis_banner_tf=?, dis_review_banner_tf=?, delivery_fee=? where adminDashNo=? `,
+      [disBannerValue, disReviewValue, deliveryFee, 1]
+    );
+    res.json({ success: true, message: "Settings updated!" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
 //add product
 const addProduct = async (req, res) => {
   try {
@@ -30,6 +92,7 @@ const addProduct = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
 //remove product
 const removeProduct = async (req, res) => {
   try {
@@ -87,6 +150,32 @@ const listProducts = async (req, res) => {
   }
 };
 
+//list admin dashboard
+const listAdminDashboard = async (req, res) => {
+  try {
+    const result = await connectDB.query(`select * from admin_dashboard`);
+    const data = result[0];
+    res.json({ success: true, result });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+//list reviews
+const listReviews = async (req, res) => {
+  const { product_id } = req.body;
+  try {
+    const [result] = await connectDB.query(
+      `select * from reviews where product_id=?`,
+      [product_id]
+    );
+    const data = result[0];
+    res.json({ success: true, result });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
 //single product
 const singleProduct = async (req, res) => {
   try {
@@ -112,12 +201,12 @@ const singleProduct = async (req, res) => {
 
 //upate product (for admin)
 const updateProduct = async (req, res) => {
-  console.log("BODY:", req.body);
-  console.log("FILES:", req.files);
+  // console.log("BODY:", req.body);
+  // console.log("FILES:", req.files);
   try {
     const { productId, title, details, price, oldPrice, category, stock } =
       req.body;
-    console.log("prodcutController-stock ", stock);
+    // console.log("prodcutController-stock ", stock);
     // Support both uploaded files and existing strings from req.body
     const getImageFilename = (fileField, nameField) => {
       if (fileField && typeof fileField === "object" && fileField.filename) {
@@ -177,4 +266,8 @@ export {
   listProducts,
   singleProduct,
   updateProduct,
+  updateSalesBanner,
+  listAdminDashboard,
+  updateAdminDashboard,
+  listReviews,
 };

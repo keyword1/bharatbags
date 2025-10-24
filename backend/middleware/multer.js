@@ -23,4 +23,18 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// === upload2 (named export) ===
+const storage2 = multer.diskStorage({
+  destination: function (req, file, callback) {
+    const uploadDir = path.join(__dirname, "../uploads/admin_images");
+    callback(null, uploadDir);
+  },
+  filename: function (req, file, callback) {
+    callback(null, "banner-" + Date.now() + "-" + file.originalname);
+  },
+});
+
+const upload2 = multer({ storage: storage2 });
+
 export default upload;
+export { upload2 };

@@ -1,8 +1,32 @@
 import express from "express";
 import verifyToken from "../middleware/verifyToken.js";
 import connectDB from "../config/mysqlDB.js";
+import { order_mail_template } from "../../frontend/src/components/order_mail_template.js";
+import nodemailer from "nodemailer";
+import "dotenv/config";
 
 const orderRouter = express.Router();
+
+const transporter = nodemailer.createTransport({
+  // secure: true,
+  // host: "smtp.gmail.com",
+  // port: 465,
+  // (OR)
+  service: "gmail",
+  auth: {
+    user: "arajeshvfx@gmail.com",
+    pass: "onhupkppswjbhwaw",
+  },
+});
+
+const orderMailTemplate = (temp) => {
+  return {
+    from: "bharatbags@gmail.com",
+    to: "arajeshneo@gmail.com",
+    subject: "Verify Your Mail",
+    html: order_mail_template(temp),
+  };
+};
 
 orderRouter.post("/check-stock", verifyToken, async (req, res) => {
   const { cartData, user_id } = req.body;
@@ -16,6 +40,8 @@ orderRouter.post("/check-stock", verifyToken, async (req, res) => {
     res.json({ success: true, message: "checked stock" });
   } catch (error) {}
 });
+//-----------
+//DEPRECIATED!! -  using the below code in payment-verify api(in server.js)
 orderRouter.post("/place", verifyToken, async (req, res) => {
   const { cartItems, totalAmount, txnId, address, orderedItems } = req.body;
   const userId = req.user.id; // ✅ extracted securely from token
@@ -35,10 +61,13 @@ orderRouter.post("/place", verifyToken, async (req, res) => {
   );
   // console.log("orderroute: Placing order for user:", orderedItems);
 
+  //send order email to the user
+  console.log("ordered items::", totalAmount);
+  orderMailTemplate(orderedItems);
   // Mock success
   res.status(200).json({ message: "Order placed successfully" });
 });
-
+//-------------
 //list user orders
 orderRouter.post("/user-orders", async (req, res) => {
   const { userId } = req.body;

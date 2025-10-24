@@ -9,3 +9,4 @@ const generateHashedPassword = async (plainPassword) => {
 
 // Example usage
 generateHashedPassword("Bharat@1992");
+// ====================

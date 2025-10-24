@@ -40,7 +40,7 @@ const transporter = nodemailer.createTransport({
 //creating otp
 const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
 
-//creating mail
+//creating otp mail
 const otpMailOption = (temp) => {
   return {
     from: "bharatbags@gmail.com",
@@ -49,7 +49,7 @@ const otpMailOption = (temp) => {
     html: email_template(temp),
   };
 };
-//creating mail
+//creating verified mail
 const verifiedMailOption = () => {
   return {
     from: "bharatbags@gmail.com",

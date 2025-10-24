@@ -17,6 +17,7 @@ import Footer from "./components/Footer";
 import { Navigate } from "react-router-dom";
 import Profile from "./pages/Profile";
 import PrivateRoute from "./components/PrivateRoute";
+import PaymentSuccess from "./pages/PaymentSuccess";
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -117,6 +118,7 @@ const App = () => {
             </PrivateRoute>
           }
         />
+        <Route path="/payment-success/:txnid" element={<PaymentSuccess />} />
         <Route path="/product/:productId" element={<Product />} />
       </Routes>
       <Footer />
