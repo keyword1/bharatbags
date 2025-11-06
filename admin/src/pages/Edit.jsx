@@ -270,7 +270,7 @@ const Edit = ({ token }) => {
           value={stock}
           type="number"
           required
-          min="0"
+          min="-1000000"
           className="px-2 py-2 no-spinners border border-gray-300 outline-none"
         />
       </div>

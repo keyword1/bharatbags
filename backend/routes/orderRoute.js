@@ -40,6 +40,7 @@ orderRouter.post("/check-stock", verifyToken, async (req, res) => {
     res.json({ success: true, message: "checked stock" });
   } catch (error) {}
 });
+
 //-----------
 //DEPRECIATED!! -  using the below code in payment-verify api(in server.js)
 orderRouter.post("/place", verifyToken, async (req, res) => {

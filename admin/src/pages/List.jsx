@@ -89,7 +89,14 @@ const List = ({ token }) => {
                 <p>{item.category}</p>
                 <p>{item.new_price}</p>
                 <p>{item.old_price}</p>
-                <p>{item.stock}</p>
+                <div>
+                  <p>{item.stock}</p>
+                  {item.stock < 1 ? (
+                    <p className="text-sm text-red-600">Out of stock</p>
+                  ) : (
+                    <p></p>
+                  )}
+                </div>
                 <NavLink
                   to={`/edit/${item.product_id}`}
                   className="flex items-center gap-1 justify-center"

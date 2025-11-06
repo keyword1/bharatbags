@@ -28,7 +28,7 @@ const Orders = () => {
   const handleUpdate = async (order_id, status_m) => {
     let result = null;
     try {
-      if (status_m == "Delivered") {
+      if (status_m == "Delivered" || status_m == "No Stock") {
         result = await axios.post(`${backendUrl}/api/order/move-to-history`, {
           order_id,
           status_m,
@@ -133,6 +133,7 @@ const Orders = () => {
                   <option value="Ready to Ship">Ready to Ship</option>
                   <option value="Shipped">Shipped</option>
                   <option value="Delivered">Delivered</option>
+                  <option value="No Stock">No Stock</option>
                 </select>
                 <p>{item.total_payment}</p>
                 <p>{item.transaction_id}</p>

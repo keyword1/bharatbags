@@ -58,15 +58,55 @@ app.get("/test", async (req, res) => {
 //-----------------------
 const tempOrder = {};
 app.use("/api/payment/verify/", async (req, res) => {
+  /* here once the payment verified,
+  > stock is deducted from DB
+  > check if stock became over sold(stock<0)
+  >if stock<0, set order status to 'not available' and revert the stock
+  > if stock>0, set order status to available
+  */
   try {
+    let stock_availability = "available";
     let { txnid, orderAddress, orderedItems, amount, userId } = req.query;
     const data = await payClient.verifyPayment(txnid);
-    console.log("verify from payclient ", data);
+    // console.log("payU id: ", data.transaction_details[txnid].mihpayid);
+    // console.log("verify from payclient ", data);
+    let payu_id = data.transaction_details[txnid].mihpayid;
+    console.log("ordered items for whats app: ", tempOrder);
+
     const status = data.transaction_details[txnid];
     if (status.status === "success") {
-      // return res.json({ success: true, message: "Payment successful" });
-      await connectDB.query(
-        `insert into orders (user_id,total_payment,transaction_id,address,item_qty,status_m) values (?,?,?,?,?,?)`,
+      // console.log("ordered items: ", tempOrder.orderedItems);
+      for (const item of tempOrder.orderedItems) {
+        let p_id = Number(item.id);
+        await connectDB.query(
+          //deduct stock
+          `update products set stock=stock-? where product_id=?`,
+          [item.qty, p_id]
+        );
+        const [deducted_data] = await connectDB.query(
+          //checks if stock is -ve
+          `select stock from products where product_id=?`,
+          [p_id]
+        );
+        if (deducted_data[0].stock < 0) {
+          //if stock is -ve, set order not-available
+          console.log("deducted_data: ", deducted_data[0].stock);
+          stock_availability = "Not-available";
+        }
+      }
+      if (stock_availability == "Not-available") {
+        for (const item of tempOrder.orderedItems) {
+          let p_id = Number(item.id);
+          await connectDB.query(
+            //revert stock stock
+            `update products set stock=stock+? where product_id=?`,
+            [item.qty, p_id]
+          );
+        }
+      }
+
+      const inserted_data = await connectDB.query(
+        `insert into orders (user_id,total_payment,transaction_id,address,item_qty,status_m,stock_status,payu_id) values (?,?,?,?,?,?,?,?)`,
         [
           tempOrder.userId, //userId,
           Number(tempOrder.amount), //Number(amount),
@@ -74,10 +114,27 @@ app.use("/api/payment/verify/", async (req, res) => {
           JSON.stringify(tempOrder.orderAddress),
           JSON.stringify(tempOrder.orderedItems),
           "Ready to Ship",
+          stock_availability,
+          payu_id,
         ]
       );
+
+      // console.log("inserted data: ", inserted_data);
+      // console.log("order Id", inserted_data[0].insertId);
+      tempOrder.orderId = inserted_data[0].insertId;
+
+      //details for whatsapp message
+      const whatsapp_info = {
+        payu_id: payu_id,
+        amount: tempOrder.amount,
+        orderId: tempOrder.orderId,
+      };
+      // console.log("whats app message: ", whatsapp_info);
+
+      const encodedInfo = encodeURIComponent(JSON.stringify(whatsapp_info));
+
       res.redirect(
-        `${process.env.FRONTEND_URL}/payment-success/${txnid}?status=success`
+        `${process.env.FRONTEND_URL}/payment-success/${txnid}?status=success&whatsapp_info=${encodedInfo}`
       );
     } else {
       res.redirect(

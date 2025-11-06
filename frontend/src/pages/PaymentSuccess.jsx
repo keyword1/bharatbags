@@ -11,6 +11,10 @@ const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const { txnid } = useParams();
   const status = searchParams.get("status");
+  const whatsapp_info = JSON.parse(
+    decodeURIComponent(searchParams.get("whatsapp_info"))
+  );
+  console.log("whatsapp info: ", whatsapp_info);
   const sendWhatsapp = async () => {
     const response = await axios({
       url: `https://graph.facebook.com/v22.0/802860382911251/messages`,
@@ -24,8 +28,27 @@ const PaymentSuccess = () => {
         to: "917013715093",
         type: "template",
         template: {
-          name: "hello_world",
+          name: "sale_alerts",
           language: { code: "en_US" },
+          components: [
+            {
+              type: "body",
+              parameters: [
+                {
+                  type: "text",
+                  text: whatsapp_info.orderId.toString(), //"520",
+                },
+                {
+                  type: "text",
+                  text: whatsapp_info.amount.toString(), //"250",
+                },
+                {
+                  type: "text",
+                  text: whatsapp_info.payu_id, //"10023568",
+                },
+              ],
+            },
+          ],
         },
       },
     });
@@ -37,7 +60,7 @@ const PaymentSuccess = () => {
       sendWhatsapp();
       navigate("/orders");
     } else {
-      console.log("pays wasn't success");
+      console.log("pay wasn't success");
     }
   }, [navigate, status]);
 
