@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 
 const Dashboard = ({ token }) => {
   const [disBanner, setDisBanner] = useState(false);
+  const [disBanner2, setDisBanner2] = useState(false);
   const [disReview, setDisReview] = useState(false);
   const [deliveryFee, setDeliveryFee] = useState(0);
 
@@ -19,8 +20,9 @@ const Dashboard = ({ token }) => {
       const data = response.data.result[0][0];
       // console.log("dashboard data: ", data[0]);
       console.log(typeof data.dis_banner_tf);
-      setDisBanner(data.dis_banner_tf === 1);
-      setDisReview(data.dis_review_banner_tf === 1);
+      setDisBanner(data.banner1_tf === 1);
+      setDisBanner2(data.banner2_tf === 1);
+      setDisReview(data.review_banner_tf === 1);
       setDeliveryFee(data.delivery_fee);
       // console.log("results: ", disBanner, disReview);
     }
@@ -35,7 +37,7 @@ const Dashboard = ({ token }) => {
     try {
       const response = await axios.post(
         backendUrl + "/api/product/update-admin-dashboard",
-        { disBanner, disReview, deliveryFee },
+        { disBanner, disBanner2, disReview, deliveryFee },
         { headers: { token } }
       );
 
@@ -58,11 +60,22 @@ const Dashboard = ({ token }) => {
         <input
           onChange={(e) => setDisBanner(e.target.checked)}
           type="checkbox"
-          name="banner-check"
+          name="hero-banner-check"
           id=""
           checked={disBanner}
         />
-        <label for="vehicle1"> Display banner</label>
+        <label for="vehicle1"> Display Hero Banner</label>
+        <br></br>
+      </div>
+      <div className="flex gap-2">
+        <input
+          onChange={(e) => setDisBanner2(e.target.checked)}
+          type="checkbox"
+          name="offer-banner-check"
+          id=""
+          checked={disBanner2}
+        />
+        <label for="vehicle1"> Display Offer Banner</label>
         <br></br>
       </div>
       <div className="flex gap-2">

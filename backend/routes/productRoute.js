@@ -5,7 +5,8 @@ import {
   listProducts,
   singleProduct,
   updateProduct,
-  updateSalesBanner,
+  updateHeroBanner,
+  updateOfferBanner,
   listAdminDashboard,
   updateAdminDashboard,
   listReviews,
@@ -41,12 +42,24 @@ productRouter.post(
   ]),
   updateProduct
 );
-//admin features
+//admin features ********-----**************
 productRouter.post(
-  "/update-sales-banner",
+  "/update-hero-banner",
   adminAuth,
-  upload2.fields([{ name: "image1", maxCount: 1 }]),
-  updateSalesBanner
+  upload2.fields([
+    { name: "image1", maxCount: 1 },
+    { name: "image2", maxCount: 1 },
+  ]),
+  updateHeroBanner
+);
+productRouter.post(
+  "/update-offer-banner",
+  adminAuth,
+  upload2.fields([
+    { name: "image1", maxCount: 1 },
+    { name: "image2", maxCount: 1 },
+  ]),
+  updateOfferBanner
 );
 productRouter.get("/list-admin-dashboard", listAdminDashboard);
 productRouter.post("/update-admin-dashboard", adminAuth, updateAdminDashboard);

@@ -46,7 +46,14 @@ const Sidebar = () => {
           className="flex items-center gap-2 border border-[2px] px-3 py-2 rounded-l"
         >
           <img src={logos.list} alt="" className="w-5 h-5" />
-          <p className=" hidden md:block">Add Sales Banner</p>
+          <p className=" hidden md:block">Add Hero Banner</p>
+        </NavLink>
+        <NavLink
+          to="/add-offer-banner"
+          className="flex items-center gap-2 border border-[2px] px-3 py-2 rounded-l"
+        >
+          <img src={logos.list} alt="" className="w-5 h-5" />
+          <p className=" hidden md:block">Add Offer Banner</p>
         </NavLink>
       </div>
     </div>

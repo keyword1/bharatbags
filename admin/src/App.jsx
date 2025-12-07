@@ -9,7 +9,8 @@ import Login from "./components/Login";
 import Edit from "./pages/Edit";
 import History from "./pages/History";
 import Features from "./pages/Features";
-import AddSalesBanner from "./pages/AddSalesBanner";
+import AddHeroBanner from "./pages/AddHeroBanner";
+import AddOfferBanner from "./pages/AddOfferBanner";
 import Dashboard from "./pages/Dashboard";
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -47,7 +48,11 @@ const App = () => {
                 <Route path="/features" element={<Features token={token} />} />
                 <Route
                   path="/add-sales-banner"
-                  element={<AddSalesBanner token={token} />}
+                  element={<AddHeroBanner token={token} />}
+                />
+                <Route
+                  path="/add-offer-banner"
+                  element={<AddOfferBanner token={token} />}
                 />
               </Routes>
             </div>

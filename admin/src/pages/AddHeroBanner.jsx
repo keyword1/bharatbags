@@ -5,20 +5,22 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { backendUrl } from "../App";
 
-const AddSalesBanner = ({ token }) => {
+const AddHeroBanner = ({ token }) => {
   const [image1, setImage1] = useState(false);
+  const [image2, setImage2] = useState(false);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
-    if (!image1) {
-      return toast.error("Please upload banner image");
+    if (!image1 || !image2) {
+      return toast.error("Please upload ALL banner images");
     }
     try {
       const formData = new FormData();
 
       formData.append("image1", image1);
+      formData.append("image2", image2);
       const response = await axios.post(
-        backendUrl + "/api/product/update-sales-banner",
+        backendUrl + "/api/product/update-hero-banner",
         formData,
         { headers: { token } }
       );
@@ -26,6 +28,7 @@ const AddSalesBanner = ({ token }) => {
       if (response.data.success) {
         toast.success(response.data.message);
         setImage1(false);
+        setImage2(false);
       } else {
         toast.error(response.data.message);
       }
@@ -40,20 +43,40 @@ const AddSalesBanner = ({ token }) => {
       className="flex flex-col w-full items-start gap-3"
     >
       <div>
-        <p className="mb-1">Upload Banner</p>
+        <p className="mb-1 font-bold">Upload Hero Banners</p>
 
-        <div className="flex gap-2 items-center justify-start">
+        <div className="flex gap-4 items-center justify-start">
           <label htmlFor="image1">
-            <img
-              className="w-20"
-              src={!image1 ? logos.upload2 : URL.createObjectURL(image1)}
-              alt=""
-            />
+            <div className="flex-col items-center justify-center">
+              <img
+                className="w-20"
+                src={!image1 ? logos.upload2 : URL.createObjectURL(image1)}
+                alt=""
+              />
+              <p>PC</p>
+            </div>
             <input
               onChange={(e) => setImage1(e.target.files[0])}
               type="file"
               id="image1"
               name="image1"
+              hidden
+            />
+          </label>
+          <label htmlFor="image2">
+            <div className="flex-col items-center justify-center">
+              <img
+                className="w-20"
+                src={!image2 ? logos.upload2 : URL.createObjectURL(image2)}
+                alt=""
+              />
+              <p>Mobile</p>
+            </div>
+            <input
+              onChange={(e) => setImage2(e.target.files[0])}
+              type="file"
+              id="image2"
+              name="image2"
               hidden
             />
           </label>
@@ -72,4 +95,4 @@ const AddSalesBanner = ({ token }) => {
   );
 };
 
-export default AddSalesBanner;
+export default AddHeroBanner;

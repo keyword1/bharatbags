@@ -58,7 +58,7 @@ const Profile = () => {
         </div>
       )}
 
-      <div className="flex gap-3 w-[80%] justify-center">
+      <div className="sm:flex-col flex gap-3 w-[80%] justify-center ">
         <div className="flex w-[100%] flex-col gap-3 justify-center items-center">
           <div className="flex mt-5 w-24 h-24 bg-blue-300 justify-center items-center rounded-full">
             {userDetails.user_picture ? (

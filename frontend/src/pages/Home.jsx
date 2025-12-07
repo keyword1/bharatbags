@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import Hero from "../components/Hero";
-import SaleBanner from "../components/SaleBanner";
+import HeroBanner from "../components/HeroBanner";
+import OfferBanner from "../components/OfferBanner";
 import LatestCollections from "../components/LatestCollections";
 import BestSeller from "../components/BestSeller";
 import OurPolicy from "../components/OurPolicy";
@@ -13,12 +14,19 @@ const Home = () => {
   // cron.schedule("*/10 * * * * *", async () => {
   //   console.log("Checking for expired reservations...");
   // });
-  const { displayBanner, displayReview } = useContext(ShopContext);
+  const {
+    displayBanner,
+    displayBanner2,
+    displayReview,
+    salesBanner,
+    salesBannerSM,
+  } = useContext(ShopContext);
   return (
     <div>
-      <Hero />
+      {/* <Hero /> */}
+      {displayBanner == 1 && <HeroBanner />}
       <LatestCollections />
-      {displayBanner == 1 && <SaleBanner />}
+      {displayBanner2 == 1 && <OfferBanner />}
       {displayReview == 1 && <ReviewBanner />}
       <JustCollections />
       {/* <BestSeller/> */}

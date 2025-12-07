@@ -3,16 +3,18 @@ import fs from "fs";
 import path from "path";
 
 //update banner
-const updateSalesBanner = async (req, res) => {
+const updateHeroBanner = async (req, res) => {
   try {
     //======================================================delete banner first
     const [getBanner] = await connectDB.query(
-      `select sales_banner1 from admin_dashboard where adminDashNo=?`,
+      `select banner1, banner1sm from admin_dashboard where adminDashNo=?`,
       [1]
     );
     // console.log("get banner: ", getBanner[0].sales_banner1);
-    const filename = getBanner[0].sales_banner1;
+    const filename = getBanner[0].banner1;
     const filePath = path.join("uploads", "admin_images", filename);
+    const filename2 = getBanner[0].banner1sm;
+    const filePath2 = path.join("uploads", "admin_images", filename);
     // adjust if your path is different
     if (fs.existsSync(filePath)) {
       fs.unlink(filePath, (err) => {
@@ -23,14 +25,73 @@ const updateSalesBanner = async (req, res) => {
         }
       });
     }
+    if (fs.existsSync(filePath2)) {
+      fs.unlink(filePath2, (err) => {
+        if (err) {
+          console.error(`Error deleting ${filename2}:`, err.message);
+        } else {
+          console.log(`Deleted: ${filename2}`);
+        }
+      });
+    }
     //=============================================================update banner in DB
     const image1 = req.files.image1 && req.files.image1[0];
+    const image2 = req.files.image2 && req.files.image2[0];
     // console.log(title, details, price, category);
-    const banner = image1.filename;
+    const banner1 = image1.filename;
+    const banner1sm = image2.filename;
     // console.log(arr);
     const sql = await connectDB.query(
-      `update admin_dashboard set sales_banner1=? where adminDashNo=?`,
-      [banner, 1]
+      `update admin_dashboard set banner1=?, banner1sm=? where adminDashNo=?`,
+      [banner1, banner1sm, 1]
+    );
+    console.log(sql.insertId); //insertId = product_id (which u get in the 'sql' obj)
+    res.json({ success: true, message: "updated sales banner" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+const updateOfferBanner = async (req, res) => {
+  try {
+    //======================================================delete banner first
+    const [getBanner] = await connectDB.query(
+      `select banner2, banner2sm from admin_dashboard where adminDashNo=?`,
+      [1]
+    );
+    // console.log("get banner: ", getBanner[0].sales_banner1);
+    const filename = getBanner[0].banner2;
+    const filePath = path.join("uploads", "admin_images", filename);
+    const filename2 = getBanner[0].banner2sm;
+    const filePath2 = path.join("uploads", "admin_images", filename);
+    // adjust if your path is different
+    if (fs.existsSync(filePath)) {
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error(`Error deleting ${filename}:`, err.message);
+        } else {
+          console.log(`Deleted: ${filename}`);
+        }
+      });
+    }
+    if (fs.existsSync(filePath2)) {
+      fs.unlink(filePath2, (err) => {
+        if (err) {
+          console.error(`Error deleting ${filename2}:`, err.message);
+        } else {
+          console.log(`Deleted: ${filename2}`);
+        }
+      });
+    }
+    //=============================================================update banner in DB
+    const image1 = req.files.image1 && req.files.image1[0];
+    const image2 = req.files.image2 && req.files.image2[0];
+    // console.log(title, details, price, category);
+    const banner2 = image1.filename;
+    const banner2sm = image2.filename;
+    // console.log(arr);
+    const sql = await connectDB.query(
+      `update admin_dashboard set banner2=?, banner2sm=? where adminDashNo=?`,
+      [banner2, banner2sm, 1]
     );
     console.log(sql.insertId); //insertId = product_id (which u get in the 'sql' obj)
     res.json({ success: true, message: "updated sales banner" });
@@ -41,7 +102,7 @@ const updateSalesBanner = async (req, res) => {
 //update admin dashboard
 const updateAdminDashboard = async (req, res) => {
   try {
-    const { disBanner, disReview, deliveryFee } = req.body;
+    const { disBanner, disBanner2, disReview, deliveryFee } = req.body;
 
     // Validate inputs
     if (typeof disBanner === "undefined" || typeof disReview === "undefined") {
@@ -53,11 +114,12 @@ const updateAdminDashboard = async (req, res) => {
 
     // Convert booleans to numeric values for MySQL (1 or 0)
     const disBannerValue = disBanner ? 1 : 0;
+    const disBanner2Value = disBanner2 ? 1 : 0;
     const disReviewValue = disReview ? 1 : 0;
 
     await connectDB.query(
-      `update admin_dashboard set dis_banner_tf=?, dis_review_banner_tf=?, delivery_fee=? where adminDashNo=? `,
-      [disBannerValue, disReviewValue, deliveryFee, 1]
+      `update admin_dashboard set banner1_tf=?, banner2_tf=?, review_banner_tf=?, delivery_fee=? where adminDashNo=? `,
+      [disBannerValue, disBanner2Value, disReviewValue, deliveryFee, 1]
     );
     res.json({ success: true, message: "Settings updated!" });
   } catch (error) {
@@ -266,7 +328,8 @@ export {
   listProducts,
   singleProduct,
   updateProduct,
-  updateSalesBanner,
+  updateHeroBanner,
+  updateOfferBanner,
   listAdminDashboard,
   updateAdminDashboard,
   listReviews,

@@ -10,8 +10,12 @@ export const ShopContext = createContext();
 const ShopContextProvider = (props) => {
   const [products, setProducts] = useState([]);
   const [salesBanner, setSalesBanner] = useState();
+  const [salesBannerSM, setSalesBannerSM] = useState();
+  const [banner2, setBanner2] = useState();
+  const [banner2SM, setBanner2SM] = useState();
   const [orderedItems, setOrderedItems] = useState([]);
   const [displayBanner, setDisplayBanner] = useState(false);
+  const [displayBanner2, setDisplayBanner2] = useState(false);
   const [displayReview, setDisplayReview] = useState(false);
   const [deliveryFee, setDeliveryFee] = useState(0);
   useEffect(() => {
@@ -28,11 +32,15 @@ const ShopContextProvider = (props) => {
         backendUrl + "/api/product/list-admin-dashboard"
       );
       const admin_items = result2.data.result[0];
-      console.log("admin items: ", admin_items[0].sales_banner1);
-      setSalesBanner(admin_items[0].sales_banner1);
-      setDisplayBanner(admin_items[0].dis_banner_tf);
-      setDisplayReview(admin_items[0].dis_review_banner_tf);
+      console.log("admin items: ", admin_items[0].banner1);
+      setSalesBanner(admin_items[0].banner1);
+      setSalesBannerSM(admin_items[0].banner1sm);
+      setBanner2(admin_items[0].banner2);
+      setBanner2SM(admin_items[0].banner2sm);
+      setDisplayBanner(admin_items[0].banner1_tf);
+      setDisplayReview(admin_items[0].review_banner_tf);
       setDeliveryFee(Number(admin_items[0].delivery_fee));
+      setDisplayBanner2(admin_items[0].banner2_tf);
     };
     fetchData();
   }, []);
@@ -115,8 +123,12 @@ const ShopContextProvider = (props) => {
     setOrderedItems,
     setCartItems,
     salesBanner,
+    salesBannerSM,
     displayBanner,
     displayReview,
+    displayBanner2,
+    banner2,
+    banner2SM,
   };
 
   return (
